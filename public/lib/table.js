@@ -9,7 +9,14 @@ class Table {
     this._border = '';
     this._style = '';
     this._address = undefined;
-    this._typeInsert='//'
+    this._typeInsert='//';
+    // // - p=1600 кг/м3
+    // //k - m=4800 кг; вес кирпича  /../
+    // //f
+    // 
+  }
+  set typeInsert(value){
+    this._typeInsert=value;
   }
   set insertAddress(address) {
     this._address = address;
@@ -37,26 +44,42 @@ class Table {
   }
   printValues(){
     let app=document.querySelector(this._address);
-    //let nameValues=nameValues || [];
-    
-    for (let i=0; i<this._data.length; i++){
-      if(true){
-        let search=new RegExp('\/'+this._data[i][0]+'\/',"g");
 
+
+    for (let i=0; i<this._data.length; i++){
+      if(this._typeInsert=='//k'){
+        let search=new RegExp('\/'+this._data[i][0]+'\/k',"g");
+        let replaceValue=this._data[i][0]+'='+this._data[i][1]+' '+this._data[i][3]+"; "+this._data[i][4];
+        app.innerHTML=app.innerHTML.replace(search, replaceValue);        
+      }else if(this._typeInsert=='//f'){
+        let search=new RegExp('\/'+this._data[i][0]+'\/f',"g");
+        let replaceValue=this._data[i][0]+'='+this._data[i][2]+"; ";
+        app.innerHTML=app.innerHTML.replace(search, replaceValue);        
+
+      }else if(this._typeInsert=='//F' && (this._data[i][2] !="")){
+        let search=new RegExp('\/'+this._data[i][0]+'\/F',"g");
+        let formula=this._data[i][2];
+        for(let j=0; j<i; j++){
+          let searchFormula=new RegExp("(?<=^|[\*\/\+-])"+this._data[j][0]+"(?=$|[\*\/\+-])","g");
+          let replaceFormula=this._data[j][1]+" ["+this._data[j][3]+"]";
+          formula=formula.replace(searchFormula, replaceFormula);
+        }
+        let replaceValue=this._data[i][0]+'='+formula+"; ";
+        app.innerHTML=app.innerHTML.replace(search, replaceValue);        
+
+      }else if(this._typeInsert=='//p'){
+        let search=new RegExp('\/'+this._data[i][0]+'\/(?=[^kfF])',"g");
         let replaceValue=this._data[i][0]+'='+this._data[i][1]+' '+this._data[i][3];
         app.innerHTML=app.innerHTML.replace(search, replaceValue);        
+
+      }else if(this._typeInsert=='//'){
+        let search=new RegExp('\/'+this._data[i][0]+'\/(?=[^kfF])',"g");
+        let replaceValue=this._data[i][0]+'='+this._data[i][1]+' '+this._data[i][3];
+        app.innerHTML=app.innerHTML.replace(search, replaceValue);        
+
       }
 //alert(replaceValue);
     }
-    //let search=new RegExp('\/'+this._data[nameValue][0]+'\/',"g");
-
-    //let replaceValue=this._data[nameValue][0]+'='+this._data[nameValue][1]+' '+this._data[nameValue][3];
-//alert(replaceValue)
-    //app.innerHTML=app.innerHTML.replace(search, replaceValue);
-    //replace=replace.replace(/(\[])/g, "")
-      //value['value']=
-    //alert(search)
-     //app.innerHTML=`${this._data[numberValue][0]}=${this._data[numberValue][1]} ${this._data[numberValue][3]} `;
 
   }
   transpose() {
