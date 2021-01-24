@@ -130,6 +130,22 @@ class Figure{
   get shadowPoints(){return this._shadowPoints}
 }
 
+class Square{
+  constructor(width,height){
+    this._width=width;
+    this._height=height;
+    this._orderBypass=[[0,1,2],[2,3,0]];
+    this._insertP1=undefined; // point insert square
+    this._insertP2=undefined; 
+    this._turn=undefined; // угол поворота и 2 точки, относительно которых поворачивается
+    this.createPoints();
+  }
+  createPoints(){
+    let answer=[]; answer.push([0,0,0]); answer.push([width,0,0]);  answer.push([width,height,0]); answer.push([0, height,0]);
+    this._points=answer;
+  }
+}
+
 class Coordinates{
   constructor(){
     this._figures=[];
@@ -172,7 +188,9 @@ class Coordinates{
     this._vPlane=vPlane;
   }
   get axisTop(){return this._axisTop}
+  set vAxisTop(value){this._vAxisTop=value}
   get vAxisTop(){return this._vAxisTop}
+  set vPlane(value){this._vPlane=value}
   get vPlane(){return this._vPlane}
   set angle(value){this._angle=value}
   get angle(){return this._angle}
@@ -406,7 +424,8 @@ m2.push([x+dx, y, z]);
 m2.push([x+dx,y+dy,z]);
 m2.push([x, y+dy, z]);
 
-
+//let f4=new Square(200,300);
+//f4.strokeStyle="red";
 
 let f1=new Figure();
 x=100, y=-50, z=50, dx=100, dy=200, dz=70;
@@ -464,6 +483,16 @@ function square1(x, y, z, dx, dy, dz){
   m2.push([x+dx, y, z]);
   m2.push([x+dx,y+dy,z]);
   m2.push([x, y+dy, z]);
+  //alert(m2)
+  return m2
+}
+
+function square(width, height){
+   let m2=[];
+  m2.push([0,0,0]);
+  m2.push([width, 0, 0]);
+  m2.push([width,height,0]);
+  m2.push([0, 0, 0]);
   //alert(m2)
   return m2
 }
