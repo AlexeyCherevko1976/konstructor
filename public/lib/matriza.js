@@ -115,7 +115,13 @@ class Figure{
     this._shadowPoints=[];
     this._strokeStyle="red";
   }
-  set points(value){this._points=value;}
+  set points(value){
+      let m=[];
+      for(let i=0; i<value.length; i++){
+        m.push(value[i]);
+      }
+    this._points=m;
+    }
   get points(){return this._points}
   set strokeStyle(value){this._strokeStyle=value;}
   get strokeStyle(){return this._strokeStyle}
@@ -128,22 +134,127 @@ class Figure{
     this._shadowPoints=value;
   }
   get shadowPoints(){return this._shadowPoints}
+  offset(value){
+    let a0=[1,0,0,0]; let a1=[0,1,0,0]; let a2=[0,0,1,0]; 
+    let a3=[value[0], value[1], value[2], 1];
+    let a=[a0, a1, a2, a3];
+    for (let i=0; i<this._points.length; i++){
+        this._points[i].push(1);
+        this._points[i]=matrizaMultiply(this._points[i],a);
+
+    }
+    return this._points
+
+  }
+  turnX(angle){
+    let a0=[1,0,0,0], a1=[0,Math.cos(angle),Math.sin(angle),0], a2=[0,-Math.sin(angle),Math.cos(angle),0], a3=[0, 0, 0, 1], a=[a0, a1, a2, a3];
+    for (let i=0; i<this._points.length; i++){
+        this._points[i].push(1);
+        this._points[i]=matrizaMultiply(this._points[i],a);
+
+    }
+    return this._points
+  }
+  turnY(angle){
+    let a0=[Math.cos(angle),0,-Math.sin(angle),0], a1=[0,1,0,0], a2=[Math.sin(angle),0,Math.cos(angle),0], a3=[0, 0, 0, 1], a=[a0, a1, a2, a3];
+    for (let i=0; i<this._points.length; i++){
+        this._points[i].push(1);
+        this._points[i]=matrizaMultiply(this._points[i],a);
+
+    }
+    return this._points
+  }
+  turnZ(angle){
+    let a0=[Math.cos(angle),Math.sin(angle),0,0], a1=[-Math.sin(angle),Math.cos(angle),0,0], a2=[0,0,1,0], a3=[0, 0, 0, 1], a=[a0, a1, a2, a3];
+    for (let i=0; i<this._points.length; i++){
+        this._points[i].push(1);
+        this._points[i]=matrizaMultiply(this._points[i],a);
+
+    }
+    return this._points
+  }
+  turn(p1, p2, angle){
+    this.points.push(p1);
+    this.points.push(p2);
+    let n1=this.points.length-2;
+    let n2=this.points.length-1;
+    let dx=-this.points[n1][0], dy=-this.points[n1][1], dz= -this.points[n1][2];
+    this.offset([dx, dy, dz]);
+    let dUx=Math.atan(this.points[n2][1]/this.points[n2][2]);
+    this.turnX(dUx);
+    let dUy=Math.atan(-this.points[n2][0]/this.points[n2][2]);
+    this.turnY(dUy);
+    this.turnZ(angle);
+    //alert(this.points[n2])
+   
+    this.turnY(-dUy);
+    this.turnX(-dUx);
+    this.offset([-dx, -dy, -dz]);
+    return
+    let v1=new Vektor(p1);
+    let v2=new Vektor(p2);
+    let v12=v2.sub(v1);
+    
+    let p1o=[0,0,0];
+    let p2o=v12.data;
+
+   // alert(`v1=${v1.data}; v2=${v2.data}; p2o=${p2o}`);
+   // this._points.push(v12.data);
+  //  v12=new Vektor(this._points(this._points.length-1));
+   // alert(v12.ort().data)
+  this.turnY(-Math.acos(v12.ort().data[1]));
+   v12=new Vektor(this._points[1]);
+
+  //this.turnY(-Math.acos(v12.ort().data[1]))
+   //v12=new Vektor(this._points[this._points.length-1]);
+
+
+   // alert(`this._points[0]=${this._points[0]}; this._points[1]=${this
+    return this._points
+  
+  }
 }
 
-class Square{
+function matrizaMultiply(vektor, matriza){
+  let m0=vektor[0]*matriza[0][0]+vektor[1]*matriza[1][0]+vektor[2]*matriza[2][0]+vektor[3]*matriza[3][0];
+  let m1=vektor[0]*matriza[0][1]+vektor[1]*matriza[1][1]+vektor[2]*matriza[2][1]+vektor[3]*matriza[3][1];
+  let m2=vektor[0]*matriza[0][2]+vektor[1]*matriza[1][2]+vektor[2]*matriza[2][2]+vektor[3]*matriza[3][2];
+  //let m0=vektor[0]*matriza[0][0]
+  return [m0, m1, m2]
+}
+
+class Square extends Figure{
   constructor(width,height){
+    super();
     this._width=width;
     this._height=height;
     this._orderBypass=[[0,1,2],[2,3,0]];
     this._insertP1=undefined; // point insert square
     this._insertP2=undefined; 
     this._turn=undefined; // угол поворота и 2 точки, относительно которых поворачивается
-    this.createPoints();
+    let answer=[]; answer.push([0,0,0]); answer.push([width,0,0]);  answer.push([width,height,0]); answer.push([0, height,0]);
+    this._points=answer;
   }
   createPoints(){
     let answer=[]; answer.push([0,0,0]); answer.push([width,0,0]);  answer.push([width,height,0]); answer.push([0, height,0]);
     this._points=answer;
   }
+}
+
+class Box extends Figure{
+  constructor(width,length, height){
+    super();
+    this._width=width;
+    this._height=height;
+    this._orderBypass=[[0,1,2,3,0,4,5,6,7,4],[1,5],[2,6],[3,7]];
+    this._insertP1=undefined; // point insert square
+    this._insertP2=undefined; 
+    this._turn=undefined; // угол поворота и 2 точки, относительно которых поворачивается
+    let answer=[]; answer.push([0,0,0]); answer.push([width,0,0]);  answer.push([width,length,0]); answer.push([0, length,0]);
+    answer.push([0,0,height]); answer.push([width,0,height]);  answer.push([width,length,height]); answer.push([0, length,height]);
+    this._points=answer;
+  }
+
 }
 
 class Coordinates{
@@ -183,9 +294,11 @@ class Coordinates{
     let v3=new Vektor(this._axisTop[2]);
     let v21=v2.sub(v1).ort();
     this._vAxisTop=v21;
+    
     let v31=v3.sub(v1);
     let vPlane=v21.vektorMultiply(v31).ort();
     this._vPlane=vPlane;
+   // alert(`${this._vAxisTop.data} ; ${this._vPlane.data}; v31=${v31.data};v3=${v3.data};`)
   }
   get axisTop(){return this._axisTop}
   set vAxisTop(value){this._vAxisTop=value}
@@ -210,9 +323,10 @@ class Coordinates{
   }
   get leftScreen(){return this._leftScreen}
   set rightScreen(value){this._rightScreen=value;}
-  get rightScreen(){return this._rightScreen}
-  
+  get rightScreen(){return this._rightScreen}  
   get pLeft(){return this._pLeft}
+  set margin(value){this._margin=value}
+  get margin(){return this._margin}
 
 
   setFocus(){
@@ -247,7 +361,7 @@ class Coordinates{
     //let i=0;
     let pLeft=this.checkShadow(this._figures[this._leftScreen[0]].points[this._leftScreen[1]]);
     this._pLeft=pLeft;
-
+  //alert(`${this._vAxisTop.data}; ${this._vPlane.data}; ${this._vY.data};`);
     let pRight=this.checkShadow(this._figures[this._rightScreen[0]].points[this._rightScreen[1]]);
     /*
     let dx=this._height-this._margin-pLeft[1];
@@ -395,23 +509,15 @@ draw(){
   get figures(){return this._figures}
 }
 
-
+/*
 let t1=[];
-t1.push([0,0,-0]);
+t1.push([0,1,0,-0]);
 t1.push([100, 0, 0]);
 t1.push([300, 200, 0]);
 t1.push([123, 456, 789]); //3
 t1.push([300, 0, 0]); //4
 
-let d3=new Coordinates();
-d3.axisTop=[t1[0], t1[1], t1[2]];
-d3.angle=0.5;
-d3.width=400;
-d3.height=200;
-d3.kZoom=[1,1,1];
-d3.leftScreen=[0,0];
-d3.rightScreen=[2,3];
-d3.setFocus();
+
 
 
 let x=100, y=50, z=200, dx=100, dy=200, dz=70;
@@ -424,8 +530,10 @@ m2.push([x+dx, y, z]);
 m2.push([x+dx,y+dy,z]);
 m2.push([x, y+dy, z]);
 
-//let f4=new Square(200,300);
-//f4.strokeStyle="red";
+let f4=new Square(400,300);
+f4.turn(t1[0], t1[1], -3.14/2);
+f4.offset([-20,-40,-10])
+f4.strokeStyle="red";
 
 let f1=new Figure();
 x=100, y=-50, z=50, dx=100, dy=200, dz=70;
@@ -448,7 +556,17 @@ f3.orderBypass=[[0,1,2],[2,3,0]];
 
 
 //d3.borderScreen
-d3.figures=[f1, f2, f3];
+let d3=new Coordinates();
+d3.axisTop=[t1[0], t1[1], t1[2]];
+d3.angle=0.5;
+d3.width=400;
+d3.height=200;
+d3.margin=20;
+d3.kZoom=[1,1,1];
+d3.leftScreen=[0,0];
+d3.rightScreen=[2,3];
+d3.setFocus();
+d3.figures=[f4, f1, f2, f3];
 
 d3.addressCanvas="#canvas1";
 
@@ -466,6 +584,9 @@ insert+=`d3.planePoint=${d3.planePoint.data}<br>`;
 //insert+=`d3.figures[2].points=${d3.figures[2].points}<br>`;
 insert+=`d3.figures[0].points=${d3.figures[0].points}<br>`;
 insert+=`d3.figures[0].shadowPoints=${d3.figures[0].shadowPoints}<br>`;
+
+insert+=`f4.points=${f4.points}<br>`;
+insert+=`d3.figures[3].shadowPoints=${d3.figures[3].shadowPoints}<br>`;
 //insert+=`d3.figures[1].shadowPoints=${d3.figures[1].shadowPoints}<br>`;
 //insert+=`d3.figures[2].shadowPoints=${d3.figures[2].shadowPoints}<br>`;
 //insert+=`d3.figures[1].shadowPoints=${d3.figures[1].shadowPoints}<br>`
@@ -475,6 +596,7 @@ insert+=`d3.figures[0].shadowPoints=${d3.figures[0].shadowPoints}<br>`;
 let matriza=document.querySelector("#matriza");
 matriza.innerHTML=insert;
 //matriza.innerHTML=`t1=${t1}<br>v1.data=${v1.data} v1.x=${v1.x} v1.y=${v1.y} v1.z=${v1.z} `
+*/
 
 function square1(x, y, z, dx, dy, dz){
    //x=100, y=50, z=60, dx=100, dy=200, dz=70;
@@ -497,36 +619,6 @@ function square(width, height){
   return m2
 }
 
-/** 
 
-let t1=[];
-t1.push([0,0,0]);
-t1.push([0, 200, 0]);
-t1.push([300, 0, 0]);
-t1.push([123, 456, 789]); //3
-t1.push([20, 30, 40]); //4
-
-v1=new Vektor(t1[1]);
-//v1.x=40; v1.y=50; v1.z=60;v1.data=[35, 45, 55]
-
-v2=new Vektor(t1[2]);
-v3=v1.add(v2);
-v4=v1.add(10);
-vSub=v1.sub(v2);
-vMul=v1.mul(v2);
-vVM=v1.vektorMultiply(v2).ort();
-
-
-let matriza=document.querySelector("#matriza");
-let insert=`<br>v1.data=${v1.data} v1.x=${v1.x} v1.y=${v1.y} v1.z=${v1.z} <br>`;
-insert+=`v2=${v2.data} <br>`;
-insert+=`v3.data=${v3.data}<br>`;
-insert+=`v4.data=${v4.data}<br>`;
-insert+=`vSub.data=${vSub.data}<br>`;
-insert+=`vMul=${vMul.data}<br>`
-insert+=`vVM=${vVM.data}<br>`;
-matriza.innerHTML=insert;
-
-    */
 
 

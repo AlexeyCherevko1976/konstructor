@@ -17,7 +17,9 @@ app.post("/register", urlencodedParser, function(request, response){
 	response.send(`${request.body.userName}-${request.body.userAge}`)
 })
 app.get("/", function(request, response){
-	response.send("<h2> Main Page</h2>")
+	//response.send("<h2> Main Page</h2>");
+	response.sendFile(__dirname+"/public/index.html");
+
 })
 app.get("/contact", function(request, response){
 	    let userName = request.query.name;    let id = request.query.id;
